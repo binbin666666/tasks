@@ -337,8 +337,18 @@ merge：代码合并。
 
 sync：同步主线或分支的Bug。
 
-
-
-
-
 git log后不能退出按q即可
+
+#### 遇到远程和本地不一样的报错
+
+```c
+git init                           //初始化仓库
+git add .(文件name)                //添加文件到本地 
+git commit -m “first commit”      //添加文件描述信息
+git remote add origin  远程仓库地址 //链接远程仓库 
+git pull origin master           // 把本地仓库的变化连接到远程仓库master
+git push -u origin master        //把本地仓库的文件推送到远程仓库master                     
+```
+
+
+
