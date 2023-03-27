@@ -339,16 +339,121 @@ sync：同步主线或分支的Bug。
 
 git log后不能退出按q即可
 
-#### 遇到远程和本地不一样的报错
+## 版本回退
+
+1.没有add
+
+2.已经add未commit
+
+3.已经commit
 
 ```c
+git log //查看日志
+//情况一使用
+git checkout 目录下+文件名
+//情况二使用
+git checkout commitID 目录下+文件名      //commitID通过git log 查询
+//情况三使用
+git checkout commitID 目录下+文件名      //commitID通过git log 查询
+
+```
+
+![](C:/Users/zhangjiejie666/Desktop/star%E9%AA%8C%E6%94%B6/git%E7%AC%94%E8%AE%B0/%E6%96%B0%E5%BB%BA%E6%96%87%E4%BB%B6%E5%A4%B9/GZYA_MIJ2ODV2LJVDNRTEK.jpg)
+
+
+
+## 分支管理
+
+```c
+//分支创建
+	git init -b dev       //创建了dev的分支
+    git branch        //查看当前分支状况
+    git branch cs     //创建了cs的分支
+    git branch -m cs abc   //修改了cs名字为abc
+//分支删除
+        git branch -d abc    //删除abc分支“-D为强制删除不论是否合并过，-d为删除已合并过的分支”
+//分支切换
+        git checkout abc     //切换到abc的分支目录下
+//分支合并
+        git merge main      //把main分支与当前分支合并
+//分支创建并且切换到分支
+        git checkout -b edf    //创建edf分支并且进入edf分支
+        
+```
+
+
+
+  
+
+<img src="C:/Users/zhangjiejie666/Desktop/star%E9%AA%8C%E6%94%B6/git%E7%AC%94%E8%AE%B0/%E6%96%B0%E5%BB%BA%E6%96%87%E4%BB%B6%E5%A4%B9/2-16799135360215.jpg" alt="2" style="zoom:50%;" />
+
+<img src="C:/Users/zhangjiejie666/Desktop/star%E9%AA%8C%E6%94%B6/git%E7%AC%94%E8%AE%B0/%E6%96%B0%E5%BB%BA%E6%96%87%E4%BB%B6%E5%A4%B9/3-16799135360276.jpg" alt="3"  />
+
+
+
+## 远程库的使用
+
+```c
+
+
+git remote add 名字 仓库网址  //增加多个远程库：
+git push gitee main   //推送main分支到gitee
+git remote -v //展示操作方法
+git remote show //展示当前已关联的远程库
+git remote rename 旧名字 新名字  //修改远程仓库名字
+```
+
+
+
+## PUSH冲突解决问题
+
+```c
+//1.能合并的冲突
+git pull  //下拉远程库内容
+//蓝色字母表示需要提交修改信息
+:wq   //直接提交
+//2.不能合并的冲突
+    git diff 分支名 文件名   //查看修改内容
+    git pull //程序会报错，我们需要手动去解决冲突
+    再进行git add .和git commit 和git push
+//3.还是不能提交的话
 git init                           //初始化仓库
 git add .(文件name)                //添加文件到本地 
 git commit -m “first commit”      //添加文件描述信息
 git remote add origin  远程仓库地址 //链接远程仓库 
 git pull origin master           // 把本地仓库的变化连接到远程仓库master
-git push -u origin master        //把本地仓库的文件推送到远程仓库master                     
+git push -u origin master        //把本地仓库的文件推送到远程仓库master     
+```
+
+​             
+
+## 提交修正
+
+```c
+//1.对于提交错误文件的高效率且没有记录的修正
+//先修正文件内容
+git add .
+git commit --amend -m '上次提交信息'    //就不会产生多次记录
+//2.对于提交时遗漏文件的高效率且没有记录的修正
+git add .
+git commit --amend -m '上次提交信息'    //就不会产生多次记录 
+//3.长开发周期中的小提交
+git add .
+git commit --amend -m '上次提交信息n-n' 
 ```
 
 
 
+## 仓库FORK和PR
+
+在GitHub中进行FORK
+
+然后在本地进行git clone 
+
+GitHub仓库地址contrbute中
+
+
+
+
+
+## ![5](C:/Users/zhangjiejie666/Desktop/star%E9%AA%8C%E6%94%B6/git%E7%AC%94%E8%AE%B0/%E6%96%B0%E5%BB%BA%E6%96%87%E4%BB%B6%E5%A4%B9/5.jpg)
