@@ -33,33 +33,7 @@ void USARTSendStr(USART_TypeDef* USARTx, char* str)
 }
 
 
-/*Receive_sum++;	}
-					
 
-				{
-					char a[]="star nb";
-					while(a[i]!='\0'){USART_SendData(USART1,*(a+i));i++;}
-				}*/
-
-
-
-		
-/*if(Receive_sum==17){
-				
-	while(*(USART_ReceiveString+i)!='\0'){
-					USART_SendData(USART1,*(USART_ReceiveString+i));
-					i++;}   
-USART_ClearITPendingBit(USART1,USART_IT_RXNE);	}//遍历输出得到的字符串
-					}*/
-				
-/*if(strcmp(USART_ReceiveString,"star nb or not nb") == 0)
-				{
-					char a[]="star nb";
-					while(*(a+i)!='\0'){
-					USART_SendData(USART1,*(a+i));
-				}}
-		USART_ClearITPendingBit(USART1,USART_IT_RXNE);									//接收后先清空标志位
-	}*/
 
 
 void my_USART_Init(void)
@@ -122,15 +96,6 @@ void USART1_IRQHandler(void)
 				USARTSendStr(USART1,"star nb!!!\r\n");
 				
 		}Receive_sum=0;}
-		/*while(USART_ReceiveString[i]==a[i]){USART_SendData(USART1,*(b+Receive_sum));i++;}
-		USART_SendData(USART1,*(b+i));
-		i++;				if(strcmp("star nb or not nb",USART_ReceiveString)==0){
-			USARTSendStr(USART1,"star nb\r\n");}USART_SendData(USART1,*(USART_ReceiveString));
-		Receive_sum++;		while(USART_ReceiveString[Receive_sum]!='\n'){
-			USART_ReceiveString[Receive_sum]=0;
-			Receive_sum++;
-						USART_SendData(USART1,*(USART_ReceiveString+Receive_sum));
-							USARTSendStr(USART1,"\r\n");*/
 	}
 		USART_ClearITPendingBit(USART1,USART_IT_RXNE);	}
 

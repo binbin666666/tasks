@@ -113,6 +113,45 @@ void USART_ClearITPendingBit()    //清除中断状态标志位
     
 ```
 
+```c
+//串口初始化的配置
+void my_USART_Init(void)
+{
+NVIC_InitTypeDef NVIC1;//定义优先级初始化结构体
+GPIO_InitTypeDef GPIOstract;//定义GPIO初始化结构体
+USART_InitTypeDef myUSART;//定义串口结构体
+    
+RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_USART1,ENABLE);
+GPIOstract.GPIO_Mode=GPIO_Mode_AF_PP;
+GPIOstract.GPIO_Pin=GPIO_Pin_9;
+GPIOstract.GPIO_Speed=GPIO_Speed_10MHz;//配置GPIO9为输出引脚
+GPIO_Init (GPIOA ,&GPIOstract);
+GPIOstract.GPIO_Mode=GPIO_Mode_IN_FLOATING;
+GPIOstract.GPIO_Pin=GPIO_Pin_10;
+GPIOstract.GPIO_Speed=GPIO_Speed_10MHz;//配置GPIO10为输入引脚
+GPIO_Init (GPIOA ,&GPIOstract);
+    
+myUSART.USART_BaudRate=115200;
+myUSART.USART_HardwareFlowControl=USART_HardwareFlowControl_None;	myUSART.USART_Mode=USART_Mode_Rx|USART_Mode_Tx;
+myUSART.USART_Parity=USART_Parity_No;
+myUSART.USART_StopBits=USART_StopBits_1;
+myUSART.USART_WordLength=USART_WordLength_8b;
+    
+USART_Init(USART1,&myUSART);
+USART_Cmd(USART1,ENABLE);//使能串口1
+USART_ITConfig(USART1,USART_IT_RXNE,ENABLE);//使能接收中断
+NVIC1.NVIC_IRQChannel=USART1_IRQn;
+NVIC1.NVIC_IRQChannelCmd=ENABLE;
+NVIC1.NVIC_IRQChannelPreemptionPriority=1;
+NVIC1.NVIC_IRQChannelSubPriority=1;
+    
+NVIC_Init(&NVIC1);
+}
+
+```
+
+
+
 #### **配置流程**
 
 ![](C:/Users/zhangjiejie666/Desktop/star%E9%AA%8C%E6%94%B6/git%E7%AC%94%E8%AE%B0/%E6%96%B0%E5%BB%BA%E6%96%87%E4%BB%B6%E5%A4%B9/Y$XE68%7BI%7BZ0YQ_YB5NN@TP.png)
@@ -193,4 +232,19 @@ ADIO：用于引脚复用功能的选择和重定义，即复用功能引脚重�
 
 独立看门狗：0到x的时间内都可以喂狗
 
+```c
+//独立看门狗初始化配置
+void IWDG_Init(u8 prer,u16 rlr){
+IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);//取消写保护，使能修改独立看门狗
+IWDG_SetPrescaler(prer);//配置预分频系数
+IWDG_SetReload(rlr);//配置重装值
+IWDG_ReloadCounter();//喂狗
+IWDG_Enable();//使能看门狗
+}
+//通过计算预分频系数和重装载值可以配置出看门狗倒计时
+```
+
 窗口看门狗：有上下限的时间限制
+
+保证程序在一定正常的时间也就是正常的程序运行时才能喂狗
+
