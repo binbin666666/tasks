@@ -407,6 +407,7 @@ git push gitee main   //推送main分支到gitee
 git remote -v //展示操作方法
 git remote show //展示当前已关联的远程库
 git remote rename 旧名字 新名字  //修改远程仓库名字
+git remote add origin XXXX //添加新的远程库
 ```
 
 
