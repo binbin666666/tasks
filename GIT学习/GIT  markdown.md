@@ -378,6 +378,8 @@ git checkout commitID 目录下+文件名      //commitID通过git log 查询
         git merge main      //把main分支与当前分支合并
 //分支创建并且切换到分支
         git checkout -b edf    //创建edf分支并且进入edf分支
+ 
+        git reset –hard HEAD ^   //退到上上个版本:将HEAD^改成HEAD^^, 退到前100个版本：git reset –hard HEAD~100 
         
 ```
 
