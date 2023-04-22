@@ -355,6 +355,8 @@ git checkout 目录下+文件名
 git checkout commitID 目录下+文件名      //commitID通过git log 查询
 //情况三使用
 git checkout commitID 目录下+文件名      //commitID通过git log 查询
+git reset –hard 版本号//任意版本
+git reset –hard HEAD ^   //退到上上个版本:将HEAD^改成HEAD^^, 退到前100个版本：git reset –hard HEAD~100
 
 ```
 
@@ -378,6 +380,10 @@ git checkout commitID 目录下+文件名      //commitID通过git log 查询
         git merge main      //把main分支与当前分支合并
 //分支创建并且切换到分支
         git checkout -b edf    //创建edf分支并且进入edf分支
+//推送仓库
+        git push github HEAD:github 
+ 
+        
         
 ```
 
@@ -401,6 +407,7 @@ git push gitee main   //推送main分支到gitee
 git remote -v //展示操作方法
 git remote show //展示当前已关联的远程库
 git remote rename 旧名字 新名字  //修改远程仓库名字
+git remote add origin XXXX //添加新的远程库
 ```
 
 
