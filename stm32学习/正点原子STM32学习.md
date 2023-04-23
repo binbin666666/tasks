@@ -232,7 +232,9 @@ ADIO：用于引脚复用功能的选择和重定义，即复用功能引脚重�
 
 **Tout= ((arr+1)*(psc+1))/Tclk；**
 
+APB1：高速主频72
 
+APB2：低速主频36
 
 Tclk：TIM3 的输入时钟频率（单位为 Mhz）。
 
@@ -247,8 +249,8 @@ void TIM_Init(u16 arr,u16 psc)
 	NVIC_InitTypeDef NVICS;
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3,ENABLE);
 	
-	TIM.TIM_Period=arr;
-	TIM.TIM_Prescaler=psc;
+	TIM.TIM_Period=arr;//自动重载计数周期值
+	TIM.TIM_Prescaler=psc;//预分频系统
 	TIM.TIM_ClockDivision=0;
 	TIM.TIM_CounterMode=TIM_CounterMode_Up;
 	
@@ -297,4 +299,60 @@ IWDG_Enable();//使能看门狗
 保证程序在一定正常的时间也就是正常的程序运行时才能喂狗
 
 ### PWM输出
+
+脉冲宽度调制(PWM)，是英文“Pulse Width Modulation”的缩写，简称脉宽调制，是利用微处理器的数字输出来对模拟电路进行控制的一种非常有效的技术
+
+每个定时器有四个通道,每一个通道都有一个捕获比较寄存器, 
+将寄存器值和计数器值比较,通过比较结果输出高低电平,实现PWM信号
+
+三个重要的寄存器
+
+CCRX：比较寄存器
+
+ARR：定时器频率
+
+CNT：计数器的值
+
+则计数器大于ARR时输出高电平
+
+则CNT越接近ARR则占空比越小
+
+**PWM模式1和2以及输出极性的关系**
+
+模式一指向上计数时CNT<CCR1则为有效，
+
+向下计数时也是
+
+模式二相反
+
+而极性指的是有效为高电平或者无效为高电平
+
+```c
+void TIM_SetCompare1(TIM_TypeDef* TIMx, uint16_t Compare1)
+{
+  /* Check the parameters */
+  assert_param(IS_TIM_LIST8_PERIPH(TIMx));
+  /* Set the Capture Compare1 Register value */
+  TIMx->CCR1 = Compare1;
+}
+```
+
+预分频系数：每次tick到预分频系数值时，CNT计数器加1
+
+自动重装载值：每次CNT计数器到自动重装载值时，自动重载值归零
+
+```c
+while(1){
+	delay_ms(10);
+	if(b){
+		a++;
+	}
+	else
+		a--;
+	if(a>300){b=0;}
+	if(a==0){b=1;}
+	TIM_SetCompare1(TIM1,a);//修改比较寄存器的值，使得pwm输出
+}
+}         //实现a的自加自减
+```
 
