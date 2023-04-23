@@ -218,13 +218,61 @@ ADIO：用于引脚复用功能的选择和重定义，即复用功能引脚重�
 
 通用定时器
 
-基本定时器：没有捕获比较通道和互补输出，朱永于驱动DAC
+基本定时器：没有捕获比较通道和互补输出，主要用于驱动DAC
+
+以STM32F103的TIM1为例，其总线时钟最大为72MHz，体现在16位的定时器上的效果就是从0计数到65535（2的16次方为65536）上溢只需要0.9毫秒。如果我们需要更长时间的定时间隔，那么就需要预分频器对时钟进行分频处理，以降低定时器时钟（CK_CNT）的频率。
+
+除此之外，也可以通过配置预分频器，来获取想要的定时器时钟频率。依然以上边的TIM1为例，如果我们想获取一个精确的1ms中断，如果不分频，72MHz的时钟对应每周期1/72us，十分不利于计算。这时候使用预分频器将其72分频后为1MHz，每周期1us，1000个计时周期即为1ms，这样既便于计算，定时也更加精确。
+
+**预分频器的工作的工作原理是，定时器时钟源每tick一次，预分频器计数器值+1，直到达到预分频器的设定值，然后再tick一次后计数器归零，同时，CNT计数器值+1。**
+
+公式：
 
 
+
+**Tout= ((arr+1)*(psc+1))/Tclk；**
+
+
+
+Tclk：TIM3 的输入时钟频率（单位为 Mhz）。
+
+Tout：TIM3 溢出时间（单位为 us）。
 
 计数模式：向上，向下，双向计数
 
+```c
+void TIM_Init(u16 arr,u16 psc)
+{
+	TIM_TimeBaseInitTypeDef TIM;
+	NVIC_InitTypeDef NVICS;
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3,ENABLE);
+	
+	TIM.TIM_Period=arr;
+	TIM.TIM_Prescaler=psc;
+	TIM.TIM_ClockDivision=0;
+	TIM.TIM_CounterMode=TIM_CounterMode_Up;
+	
+	TIM_TimeBaseInit(TIM3,&TIM);//定时器TIM3的初始化
+	TIM_ITConfig(TIM3,TIM_IT_Update,ENABLE);//允许更新中断
+	
+	NVICS.NVIC_IRQChannel=TIM3_IRQn;
+	NVICS.NVIC_IRQChannelCmd=ENABLE;
+	NVICS.NVIC_IRQChannelPreemptionPriority=3;
+	NVICS.NVIC_IRQChannelSubPriority=0;
+	
+	NVIC_Init(&NVICS);//中断优先级的配置
+	
+	TIM_Cmd(TIM3,ENABLE);
+	
+}
+TIM_TimeBaseStructure.TIM_ClockDivision = 0; //设置时钟分割:TDTS = Tck_tim
+//等同于
+TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1; //设置时钟分割:TDTS = Tck_tim
+```
 
+
+
+错误原因：在配置NVIC优先级时，把结构体的各部分配置错误
 
 ### 看门狗
 
@@ -247,4 +295,6 @@ IWDG_Enable();//使能看门狗
 窗口看门狗：有上下限的时间限制
 
 保证程序在一定正常的时间也就是正常的程序运行时才能喂狗
+
+### PWM输出
 
