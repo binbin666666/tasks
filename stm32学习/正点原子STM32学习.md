@@ -158,7 +158,7 @@ NVIC_Init(&NVIC1);
 
 
 
-#### 外部中断
+### 外部中断
 
 1.每个io都可以作为外部中断输入
 
@@ -250,8 +250,8 @@ void TIM_Init(u16 arr,u16 psc)
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3,ENABLE);
 	
 	TIM.TIM_Period=arr;//自动重载计数周期值
-	TIM.TIM_Prescaler=psc;//预分频系统
-	TIM.TIM_ClockDivision=0;
+	TIM.TIM_Prescaler=psc;//预分频系数
+	TIM.TIM_ClockDivision=0;//时钟不分割
 	TIM.TIM_CounterMode=TIM_CounterMode_Up;
 	
 	TIM_TimeBaseInit(TIM3,&TIM);//定时器TIM3的初始化
@@ -335,9 +335,29 @@ void TIM_SetCompare1(TIM_TypeDef* TIMx, uint16_t Compare1)
   /* Set the Capture Compare1 Register value */
   TIMx->CCR1 = Compare1;
 }
+typedef struct
+{
+  uint16_t TIM_OCMode;      //设置PWM的调制模式
+
+  uint16_t TIM_OutputState;  //输出状态 
+
+  uint16_t TIM_OutputNState;  //互补通道的输出状态
+
+  uint16_t TIM_Pulse;   //占空比      
+
+  uint16_t TIM_OCPolarity;  //输出极性
+
+  uint16_t TIM_OCNPolarity; //互补通道的输出极性
+
+  uint16_t TIM_OCIdleState;  //空闲状态
+
+  uint16_t TIM_OCNIdleState; //互补通道的空闲状态
+} TIM_OCInitTypeDef；
 ```
 
 预分频系数：每次tick到预分频系数值时，CNT计数器加1
+
+若时钟频率为72MHZ,则一秒钟振动72MHZ次数，tick一次CNT加1.定TIM_Prescaler（预分频系数）为71，则现在tick72次CNT才加1，则时钟频率为1MHZ.
 
 自动重装载值：每次CNT计数器到自动重装载值时，自动重载值归零
 
@@ -355,4 +375,85 @@ while(1){
 }
 }         //实现a的自加自减
 ```
+
+### 输入捕获实验：测量脉冲宽度或者测量信号频率
+
+T配置捕捉IMX的CHX信道上的边沿信号发生跳变时（上升或者下降），把当前CNT寄存器（计数）的值放入CCRX寄存器（比较/捕获）中，即可完成一次捕获；
+
+**ARR寄存器：设置自动重装载值**
+
+**PSC寄存器：设置YIMX的时钟分频**
+
+**CCMR1和CCMR2寄存器（16位平分，前后八位控制一个通道）：分别控制捕获比较通道1，2和3，4；**
+
+对于通道1使用CCMR寄存器的0到7位：
+
+采样频率：n次事件后才确定捕捉CNT寄存器值（滤波的作用，容错率更高）
+
+预分频系数：n次上升或者下降才触发一次捕获
+
+TIM1的事件触发可以输出到TIM2进行，因此需要配置输入/输出模式
+
+**CCER寄存器（捕获/比较使能寄存器）**
+
+配置输出极性和输出使能
+
+```c
+void TIM_ICInit(TIM_TypeDef* TIMx, TIM_ICInitTypeDef* TIM_ICInitStruct)；//输入比较初始化函数
+
+typedef struct
+{
+uint16_t TIM_Channel;//输入捕获通道
+uint16_t TIM_ICPolarity;//极性
+uint16_t TIM_ICSelection;//输出映射关系
+uint16_t TIM_ICPrescaler;//设置分配系数
+uint16_t TIM_ICFilter;//滤波器长度
+} TIM_ICInitTypeDef;
+if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET){}//判断是否为更新中断，RESET==1；
+if (TIM_GetITStatus(TIM2, TIM_IT_CC1) != RESET){}//判断是否发生捕获事件
+TIM_ClearITPendingBit(TIM2, TIM_IT_CC1|TIM_IT_Update);//清除中断和捕获标志位
+void TIM2_IRQHandler(void)
+{ 
+
+ 	if((TIM2CH1_CAPTURE_STA&0X80)==0)//还未成功捕获	
+	{	  
+		if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET)
+		 
+		{	    
+			if(TIM2CH1_CAPTURE_STA&0X40)//已经捕获到高电平了
+			{
+				if((TIM2CH1_CAPTURE_STA&0X3F)==0X3F)//高电平太长了
+				{
+					TIM2CH1_CAPTURE_STA|=0X80;//标记成功捕获了一次
+					TIM2CH1_CAPTURE_VAL=0XFFFF;
+				}else TIM2CH1_CAPTURE_STA++;
+			}	 
+		}
+	if (TIM_GetITStatus(TIM2, TIM_IT_CC1) != RESET)//捕获1发生捕获事件
+		{	
+			if(TIM2CH1_CAPTURE_STA&0X40)		//捕获到一个下降沿 		
+			{	  			
+				TIM2CH1_CAPTURE_STA|=0X80;		//标记成功捕获到一次上升沿
+				TIM2CH1_CAPTURE_VAL=TIM_GetCapture1(TIM2);
+		   		TIM_OC1PolarityConfig(TIM2,TIM_ICPolarity_Rising); //CC1P=0 设置为上升沿捕获
+			}else  								//还未开始,第一次捕获上升沿
+			{
+				TIM2CH1_CAPTURE_STA=0;			//清空
+				TIM2CH1_CAPTURE_VAL=0;
+	 			TIM_SetCounter(TIM2,0);
+				TIM2CH1_CAPTURE_STA|=0X40;		//标记捕获到了上升沿
+		   		TIM_OC1PolarityConfig(TIM2,TIM_ICPolarity_Falling);		//CC1P=1 设置为下降沿捕获
+			}		    
+		}			     	    					   
+ 	}
+ 
+    TIM_ClearITPendingBit(TIM2, TIM_IT_CC1|TIM_IT_Update); //清除中断标志位
+ 
+}//中断程序
+
+
+
+```
+
+
 
