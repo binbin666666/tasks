@@ -16,7 +16,7 @@ void TIM1_PWM_Init(u16 arr,u16 psc)
 	TIM.TIM_ClockDivision=0;   //设置时钟分割
 	TIM.TIM_CounterMode=TIM_CounterMode_Up; //向上计数
 	
-	TIM_TimeBaseInit(TIM1,&TIM);//定时器TIM3的初始化
+	TIM_TimeBaseInit(TIM1,&TIM);//定时器TIM1的初始化
 	
 	TIMX.TIM_OCMode=TIM_OCMode_PWM2;
 	TIMX.TIM_OutputState=TIM_OutputState_Enable;
